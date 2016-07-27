@@ -74,7 +74,7 @@ void draw() {
       e.printStackTrace();
     }
     noStroke();
-    if (classification > 0) {
+    if (classification > 0.5) {
       fill(0, 0, 255);
     } else {
       fill(0, 255, 0);
