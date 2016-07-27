@@ -32,8 +32,8 @@ void setup() {
       float y = random(height);
       inst.setValue(xa, x/width); 
       inst.setValue(ya, y/height);     
-      float d = dist(x, y, width/2, height/2);
-      if (d > 200) {
+      // Left or right side of the screen
+      if (x > 300) {
         inst.setValue(ca, 0);
       } else {
         inst.setValue(ca, 1);
@@ -47,7 +47,7 @@ void setup() {
     mlp.setLearningRate(0.5);
     mlp.setMomentum(0.6);
     mlp.setTrainingTime(5000);
-    mlp.setHiddenLayers("4");
+    mlp.setHiddenLayers("3");
     mlp.buildClassifier(training);
   } 
   catch (Exception e) {
