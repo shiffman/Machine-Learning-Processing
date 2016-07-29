@@ -1,8 +1,3 @@
-
-
-
-
-
 Bird b;
 ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
