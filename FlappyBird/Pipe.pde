@@ -5,7 +5,7 @@ class Pipe {
   float w = 40;
 
   Pipe() {
-    x = width + w;
+    x = wid + w;
     top = random(height/2);
     bottom = random(height/2);
   }

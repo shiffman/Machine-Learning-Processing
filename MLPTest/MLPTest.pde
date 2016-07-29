@@ -1,11 +1,12 @@
 import weka.classifiers.functions.MultilayerPerceptron;
+//import weka.classifiers.functions.MLPClassifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
 Instances training;
-MultilayerPerceptron mlp;
+MLPClassifier mlp;
 
 void setup() {
   size(600, 600);
@@ -32,18 +33,27 @@ void setup() {
       float y = random(height);
       inst.setValue(xa, x/width); 
       inst.setValue(ya, y/height);     
-      // Left or right side of the screen
-      if (x > 300) {
+      //// Left or right side of the screen
+      //if (x > 300) {
+      //  inst.setValue(ca, 0);
+      //} else {
+      //  inst.setValue(ca, 1);
+      //}
+      float d = dist(x, y, width/2, height/2);
+      if (d > 200) {
         inst.setValue(ca, 0);
       } else {
         inst.setValue(ca, 1);
       }
+      
+      
       training.add(inst);
     }
 
     // Try a perceptron
     mlp = new MultilayerPerceptron();
     // These are arbitrary
+    
     mlp.setLearningRate(0.5);
     mlp.setMomentum(0.6);
     mlp.setTrainingTime(5000);

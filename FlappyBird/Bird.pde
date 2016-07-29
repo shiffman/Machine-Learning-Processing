@@ -7,7 +7,7 @@ class Bird {
   float r = 16;
 
   Bird() {
-    pos = new PVector(120, height/2);
+    pos = new PVector(0, height/2);
     vel = new PVector(0, 0);
     acc = new PVector();
   }
