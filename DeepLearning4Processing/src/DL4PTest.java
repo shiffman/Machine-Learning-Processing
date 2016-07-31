@@ -42,7 +42,7 @@ public class DL4PTest extends PApplet {
 	public void setup() {
 		int seed = 123;
 		double learningRate = 0.1;
-		int nEpochs = 500;
+		int nEpochs = 100;
 
 		int numInputs = 2;
 		int numOutputs = 2;
@@ -51,7 +51,7 @@ public class DL4PTest extends PApplet {
 
 		background(127);
 
-		int rows = 2500;
+		int rows = 1000;
 
 		float[][] dataf = new float[rows][2];
 		float[][] datal = new float[rows][2];
@@ -64,8 +64,8 @@ public class DL4PTest extends PApplet {
 			dataf[i][0] = x / width;
 			dataf[i][1] = y / height;
 
-			//if (x > width/2) {
-			if (d > 100) {
+			if (x > width/2) {
+			//if (d > 100) {
 				fill(0);
 				datal[i][0] = 1;
 				datal[i][1] = 0;
