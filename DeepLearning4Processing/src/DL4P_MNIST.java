@@ -20,6 +20,12 @@ import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 import processing.core.PApplet;
 
 
+/* NEXT STEPS
+@shiffman DataVec
+that's where out ETL lives
+here's example for image pipeline: deeplearning4j.org/simple-image-load-transform
+*/
+
 /**
  * From: http://deeplearning4j.org/mnist-for-beginners.html
  * 
@@ -40,9 +46,7 @@ public class DL4P_MNIST extends PApplet {
 
 
 	public void settings() {
-
 		size(400, 400);
-
 	}
 
 	public void setup() {
