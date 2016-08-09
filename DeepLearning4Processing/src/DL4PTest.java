@@ -40,6 +40,7 @@ public class DL4PTest extends PApplet {
 	}
 
 	public void setup() {
+		
 		int seed = 123;
 		double learningRate = 0.1;
 		int nEpochs = 100;
