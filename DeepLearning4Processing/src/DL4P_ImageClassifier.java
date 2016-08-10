@@ -1,7 +1,10 @@
+import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
-import org.deeplearning4j.datasets.iterator.DataSetIterator;
-import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
+import org.datavec.api.io.filters.BalancedPathFilter;
+import org.datavec.api.split.FileSplit;
+import org.datavec.image.loader.BaseImageLoader;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -16,33 +19,59 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
+import org.datavec.api.io.filters.BalancedPathFilter;
+import org.datavec.api.io.labels.ParentPathLabelGenerator;
+import org.datavec.api.split.FileSplit;
+import org.datavec.api.split.InputSplit;
+import org.datavec.image.loader.BaseImageLoader;
+import org.datavec.image.recordreader.ImageRecordReader;
+import org.datavec.image.transform.ImageTransform;
+import org.datavec.image.transform.MultiImageTransform;
+import org.datavec.image.transform.ShowImageTransform;
+import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
+import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.util.Random;
 import processing.core.PApplet;
 
 
-/* NEXT STEPS
-@shiffman DataVec
-that's where out ETL lives
-here's example for image pipeline: deeplearning4j.org/simple-image-load-transform
-*/
+
 
 /**
  * From: http://deeplearning4j.org/mnist-for-beginners.html
+ * http://deeplearning4j.org/simple-image-load-transform
  * 
  * Modified for use with Processing by Daniel Shiffman
  * *
  */
-public class DL4P_MNIST extends PApplet { 
+public class DL4P_ImageClassifier extends PApplet { 
 	public static void main(String[] args) {
-		PApplet.main(new String[] {"DL4P_MNIST"});
+		PApplet.main(new String[] {"DL4P_ImageClassifier"});
 	}
+
+
+
+	int imgH = 50;
+	int imgW = 50;
+	int channels = 3;
+	int numExamples = 80;
+	int outputNum = 4;
+
 
 	int numRows = 28; // The number of rows of a matrix.
 	int numColumns = 28; // The number of columns of a matrix.
-	int outputNum = 10; // Number of possible outcomes (e.g. labels 0 through 9). 
+	// int outputNum = 10; // Number of possible outcomes (e.g. labels 0 through 9). 
 	int batchSize = 128; // How many examples to fetch with each step. 
 	int rngSeed = 123; // This random-number generator applies a seed to ensure that the same initial weights are used when training. We’ll explain why this matters later. 
 	int numEpochs = 15; // An epoch is a complete pass through a given dataset. 
+
+
+	Random rand = new Random(rngSeed);
+	//	String [] allowedExtensions = BaseImageLoader.ALLOWED_FORMATS;
 
 
 	public void settings() {
@@ -50,15 +79,38 @@ public class DL4P_MNIST extends PApplet {
 	}
 
 	public void setup() {
-		MnistDataSetIterator mnistTrain = null;
-		MnistDataSetIterator mnistTest = null;
+		//		MnistDataSetIterator mnistTrain = null;
+		//		MnistDataSetIterator mnistTest = null;
+		//		try {
+		//			mnistTrain = new MnistDataSetIterator(batchSize, true, rngSeed);
+		//			mnistTest = new MnistDataSetIterator(batchSize, false, rngSeed);
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+
+		File dir = new File(dataPath(""));
+		String[] ext = {"jpg"};
+		FileSplit filesInDir = new FileSplit(dir, ext, rand);
+		ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
+		BalancedPathFilter pathFilter = new BalancedPathFilter(rand, ext, labelMaker);
+
+		InputSplit[] filesInDirSplit = filesInDir.sample(pathFilter, 80, 20);
+		InputSplit trainData = filesInDirSplit[0];
+		InputSplit testData = filesInDirSplit[1];
+
+		ImageRecordReader recordReader = new ImageRecordReader(imgH, imgW, channels, labelMaker);
+		ImageTransform transform = new MultiImageTransform(rand);
 		try {
-			mnistTrain = new MnistDataSetIterator(batchSize, true, rngSeed);
-			mnistTest = new MnistDataSetIterator(batchSize, false, rngSeed);
+			recordReader.initialize(trainData,transform);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		//convert the record reader to an iterator for training - Refer to other examples for how to use an iterator
+		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 1, outputNum);
+
+
 
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 		.seed(rngSeed)
@@ -90,14 +142,15 @@ public class DL4P_MNIST extends PApplet {
 
 		println("Train model....");
 		for( int i=0; i<numEpochs; i++ ){
-			model.fit(mnistTrain);
+			model.fit(dataIter);
 		}
+		dataIter.reset();
 
 
 		println("Evaluate model....");
 		Evaluation eval = new Evaluation(outputNum);
-		while(mnistTest.hasNext()){
-			DataSet next = mnistTest.next();
+		while(dataIter.hasNext()){
+			DataSet next = dataIter.next();
 			INDArray output = model.output(next.getFeatureMatrix());
 			eval.eval(next.getLabels(), output);
 		}
