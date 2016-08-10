@@ -12,6 +12,7 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.preprocessor.CnnToFeedForwardPreProcessor;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Random;
+
 import processing.core.PApplet;
 
 
@@ -55,15 +57,15 @@ public class DL4P_ImageClassifier extends PApplet {
 
 
 
-	int imgH = 50;
-	int imgW = 50;
+	int imgH = 28;
+	int imgW = 28;
 	int channels = 3;
+	int outputNum = 3;
 	int numExamples = 80;
-	int outputNum = 4;
 
 
-	int numRows = 28; // The number of rows of a matrix.
-	int numColumns = 28; // The number of columns of a matrix.
+	//int numRows = 28; // The number of rows of a matrix.
+	//int numColumns = 28; // The number of columns of a matrix.
 	// int outputNum = 10; // Number of possible outcomes (e.g. labels 0 through 9). 
 	int batchSize = 128; // How many examples to fetch with each step. 
 	int rngSeed = 123; // This random-number generator applies a seed to ensure that the same initial weights are used when training. We’ll explain why this matters later. 
@@ -111,7 +113,6 @@ public class DL4P_ImageClassifier extends PApplet {
 		DataSetIterator dataIter = new RecordReaderDataSetIterator(recordReader, 10, 1, outputNum);
 
 
-
 		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
 		.seed(rngSeed)
 		.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -121,7 +122,7 @@ public class DL4P_ImageClassifier extends PApplet {
 		.regularization(true).l2(1e-4)
 		.list()
 		.layer(0, new DenseLayer.Builder()
-		.nIn(numRows * numColumns) // Number of input datapoints.
+		.nIn(imgH * imgW * channels) // Number of input datapoints.
 		.nOut(1000) // Number of output datapoints.
 		.activation("relu") // Activation function.
 		.weightInit(WeightInit.XAVIER) // Weight initialization.
@@ -133,6 +134,13 @@ public class DL4P_ImageClassifier extends PApplet {
 		.weightInit(WeightInit.XAVIER)
 		.build())
 		.pretrain(false).backprop(true)
+		// Additional step to make this work with pairing 4D loaded images with CNN.
+		// From @AlexBlack
+		// ok, got it. so the ImageRecordReader outputs data in 4d array format 
+		// suitable for CNNs (convolutional, subsampling layers)
+		// whereas dense layer expects 2d format
+		// you can add a preprocessor to convert between the two
+		.inputPreProcessor(0, new CnnToFeedForwardPreProcessor(imgH,imgW,channels))
 		.build();
 
 
