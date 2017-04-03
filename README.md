@@ -7,5 +7,5 @@ I am working on some machine learning examples for Processing.  I would like to 
   * [neuroph](http://neuroph.sourceforge.net/)
   * [deeplearning4j](http://deeplearning4j.org/)
 * p5.js / JS
-  * [tensor flow playground?](https://github.com/tensorflow/playground/blob/master/nn.ts)
+  * [tensor flow playground?](https://github.com/tensorflow/playground/blob/master/src/nn.ts)
   * [convnetjs](http://cs.stanford.edu/people/karpathy/convnetjs/)
